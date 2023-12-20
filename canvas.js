@@ -5,7 +5,13 @@ canvas.width = canvas.height * 2;
 var check = 0;
 var index = 0;
 var maxbullets = 1000;
-var maxenemys = 20;
+var speed = 1;
+if(confirm("do you want easy mode?")) {
+    var maxenemys = 20;
+} {
+    maxenemys = 50;
+    speed = 1.5;
+}
 var maxdistance = 10;
 var reaction = 0.05;
 var player1 = {
@@ -315,7 +321,7 @@ var handlebullets = () => {
 }
 var handleEnemys = () => {
     for(let i = 0; i < maxenemys; i++) {
-        enemys[i].update(player1.x,player1.y,1);
+        enemys[i].update(player1.x,player1.y,speed);
         /*
         if(enemys[i].x > canvas.width) {
             //enemys[i].x = 0;
