@@ -12,6 +12,7 @@ if(confirm("do you want easy mode?")) {
     maxenemys = 50;
     speed = 1.5;
 }
+alert(maxenemys);
 var maxdistance = 10;
 var reaction = 0.05;
 var player1 = {
