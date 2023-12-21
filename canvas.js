@@ -382,7 +382,7 @@ var handleEnemys = () => {
         if(map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 5 || map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 2) {
             let a = RB(1,4);
             let b = RB(1,3);
-            if(maxenemys > 20) b = RB(1,6);
+            if(maxenemys > 30) b = RB(1,6);
             if(enemys[i].clump == 1 && player1.gunlength <= player1.maxhealth) player1.gunlength++;
             if(player1.gunlength >= player1.maxhealth && shooting == 0) {
                 shooting = 1;
