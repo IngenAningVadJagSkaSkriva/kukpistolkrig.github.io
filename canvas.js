@@ -8,7 +8,7 @@ var maxbullets = 1000;
 var speed = 1;
 if(confirm("do you want easy mode?")) {
     var maxenemys = 20;
-} {
+} else {
     maxenemys = 50;
     speed = 1.5;
 }
