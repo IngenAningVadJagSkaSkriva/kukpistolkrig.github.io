@@ -32,6 +32,13 @@ var player1 = {
     gunlength: 20,
     maxhealth: 40
 }
+var bomb = {
+    x: Math.floor(canvas.width / 4),
+    y: Math.floor(canvas.height / 4),
+    width: 2,
+    height: 2,
+    active: false
+}
 var mouse = {
     x: 0,
     y: 0
@@ -79,10 +86,16 @@ class bullet {
         this.speedX = speedX;
         this.speedY = speedY;
         this.index = index;
+        this.size = 2;
+        this.speed = pos(this.speedX) + pos(this.speedY);
     }
     update() {
         this.x += this.speedX;
         this.y += this.speedY;
+        if(this.speed < 0.05) {
+            this.speedX = RB(-1,1);
+            this.speedY = RB(-1,1);
+        }
     }
     end() {
         this.x = canvas.width * 1.5;
@@ -90,12 +103,14 @@ class bullet {
         this.speedX = 0;
         this.speedY = 0;
     }
-    new(x1,y1,speedX1,speedY1,index1,speed) {
+    new(x1,y1,speedX1,speedY1,index1,speed,size) {
         this.x = x1;
         this.y = y1;
         this.speedX = speedX1 * speed;
         this.speedY = speedY1 * speed;
         this.index = index1;
+        this.size = size;
+        this.speed = pos(this.speedX) + pos(this.speedY);
     }
 }
 class enemy {
@@ -210,7 +225,13 @@ var drawing = () => {
                 ctx.fillRect(j,i,1,1);
                 map[i][j] = 0;
             } else if(map[i][j] == 4) {
-                ctx.fillStyle = "grey";
+                if(RB(1,3) == 1) {
+                    ctx.fillStyle = "white";
+                } else if(RB(1,3) == 2){
+                    ctx.fillStyle = "yellow";
+                } else {
+                    ctx.fillStyle = "red";
+                }
                 ctx.fillRect(j,i,1,1);
                 map[i][j] = 0;
             } else if(map[i][j] == 5) {
@@ -278,12 +299,12 @@ var move = () => {
     player1.goalX = test(player1.x,player1.y,mouse.x,mouse.y,"X");
     player1.goalY = test(player1.x,player1.y,mouse.x,mouse.y,"Y");
 }
-var shoot = () => {
+var shoot = (x,y,speedX,speedY,size) => {
     index++;
     if(index >= maxbullets) {
         index = 0;
     }
-    bullets[index].new(player1.x2,player1.y2,player1.speedX,player1.speedY,0,5);
+    bullets[index].new(x,y,speedX,speedY,0,5,size);
 }
 var shooting = 0;
 addEventListener("mousemove", (e) => {
@@ -293,7 +314,7 @@ addEventListener("mousemove", (e) => {
     player1.goalY = test(player1.x,player1.y,mouse.x,mouse.y,"Y");
 })
 addEventListener("click", (e) => {
-    shoot();
+    shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,2);
 })
 var handlebullets = () => {
         {for(let i = 0; i < maxbullets; i++) {
@@ -312,8 +333,9 @@ var handlebullets = () => {
             bullets[i].end();
             //bullets[i].y = canvas.height;
         }
-        for(let x = -1;x < 2; x++) {
-            for(let y = -1; y < 2; y++) {
+        for(let x = bullets[i].size * -1;x < bullets[i].size; x++) {
+            for(let y = bullets[i].size * -1; y < bullets[i].size; y++) {
+                if(map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 4) boom(20);
                 map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] = 5;
             }
         }
@@ -388,7 +410,7 @@ var handleEnemys = () => {
             if(player1.gunlength >= player1.maxhealth && shooting == 0) {
                 shooting = 1;
                 var shooter = setInterval(() => {
-                    shoot();
+                    shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,3);
                     if(shooting == 0) {
                         clearInterval(shooter);
                         player1.gunlength = player1.maxhealth / 2;
@@ -439,6 +461,18 @@ var handleEnemys = () => {
         }
     }
 }
+var boom = (pieces) => {
+    if(bomb.active == false) return 0;
+    for(let i = 0; i < pieces; i++) {
+        shoot(bomb.x,bomb.y,RB(-15,15) / 10,RB(-15,15) / 10,5);
+    }
+    bomb.active = false;
+    setTimeout(() => {
+        bomb.active = true;
+        bomb.x = RB(0,canvas.width - bomb.width);
+        bomb.y = RB(0,canvas.height - bomb.height)
+    },10000 + RB(0,10000))
+}
 
 //game
 var game = () => {
@@ -487,6 +521,14 @@ var game = () => {
     if(distance(player1.x,player1.y,mouse.x,mouse.y) <= 1) {
         player1.speed = 0;
     } else player1.speed = player1.currentspeed;
+    if(bomb.active == true) {
+        if(map[bomb.y][bomb.x] == 2) boom(20);
+        for(let i = bomb.height * -1; i < bomb.height; i++) {
+            for(let j = bomb.width * -1; j < bomb.width; j++) {
+                map[i + bomb.y][j + bomb.x] = 4;
+            }
+        }
+    }
     handlebullets();
     handleEnemys();
     map[player1.y2][player1.x2] = 3;
@@ -498,3 +540,8 @@ var game = () => {
 
 game();
 drawing();
+setTimeout(() => {
+    bomb.active = true;
+    bomb.x = RB(0,canvas.width - bomb.width);
+    bomb.y = RB(0,canvas.height - bomb.height)
+},10000)
