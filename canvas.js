@@ -214,7 +214,11 @@ var drawing = () => {
     let see = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "grey";
-    ctx.fillText("WAVE: "+waves,0,canvas.height / 10,canvas.width / 2);
+    if(maxenemys > 20) {
+        ctx.fillText("WAVE: "+waves+", HARD MODE!",0,canvas.height / 10,canvas.width / 2);
+    } else {
+        ctx.fillText("WAVE: "+waves+", easy",0,canvas.height / 10,canvas.width / 2);
+    }
     for(let i = 0; i < canvas.height; i++) {
         for(let j = 0; j < canvas.width; j++) {
             if(map[i][j] == 1) {
