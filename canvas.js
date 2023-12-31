@@ -7,6 +7,7 @@ var index = 0;
 var maxbullets = 1000;
 var speed = 1;
 var reset2 = 0;
+var waves = 0;
 if(confirm("do you want easy mode?")) {
     var maxenemys = 20;
 } else {
@@ -212,6 +213,8 @@ window.addEventListener('resize', () => {
 var drawing = () => {
     let see = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "grey";
+    ctx.fillText("WAVE: "+waves,0,canvas.height / 10,canvas.width / 2);
     for(let i = 0; i < canvas.height; i++) {
         for(let j = 0; j < canvas.width; j++) {
             if(map[i][j] == 1) {
@@ -254,6 +257,7 @@ var drawing = () => {
     }
     if(see == false && reset2 == 0) {
         reset2 = 1;
+        waves++;
         setTimeout(() => {
             reset2 = 0;
         },5000)
@@ -262,6 +266,10 @@ var drawing = () => {
                 map[i][j] = 0;
             }
         }
+        for(let i = 0; i < index; i++) {
+            bullets[i].end();
+        }
+        shooting = 0;
     }
     
 }
@@ -291,6 +299,7 @@ var reset = () => {
     player1.gunlength = 20;
     player1.x = Math.floor(canvas.width / 2);
     player1.y = Math.floor(canvas.height / 2);
+    waves = 0;
     alert("YOU LOSE!");
 }
 
