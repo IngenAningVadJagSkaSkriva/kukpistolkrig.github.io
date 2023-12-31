@@ -6,6 +6,7 @@ var check = 0;
 var index = 0;
 var maxbullets = 1000;
 var speed = 1;
+var reset2 = 0;
 if(confirm("do you want easy mode?")) {
     var maxenemys = 20;
 } else {
@@ -209,6 +210,7 @@ window.addEventListener('resize', () => {
 })
 
 var drawing = () => {
+    let see = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for(let i = 0; i < canvas.height; i++) {
         for(let j = 0; j < canvas.width; j++) {
@@ -240,11 +242,23 @@ var drawing = () => {
                 map[i][j] = 0;
             } else if(map[i][j] == 6) {
                 ctx.fillStyle = "green";
+                see = true;
                 ctx.fillRect(j,i,1,1);
                 map[i][j] = 0;
             } else if(map[i][j] == 7) {
                 ctx.fillStyle = "red";
                 ctx.fillRect(j,i,1,1);
+                map[i][j] = 0;
+            }
+        }
+    }
+    if(see == false && reset2 == 0) {
+        reset2 = 1;
+        setTimeout(() => {
+            reset2 = 0;
+        },5000)
+        for(let i = canvas.height * -3; i < canvas.height * 3; i++) {
+            for(let j = canvas.width * -3; j < canvas.width * 3; j++) {
                 map[i][j] = 0;
             }
         }
