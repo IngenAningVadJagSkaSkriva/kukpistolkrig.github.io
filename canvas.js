@@ -13,6 +13,7 @@ var maxenemys = 0;
 var damage = new Audio("damage.mp3");
 var kill = new Audio("kill.mp3");
 var heal = new Audio("heal.mp3");
+var win = new Audio("win.mp3");
 var Sshoot = [];
 var shooti = 0;
 for(let i = 0; i < 20; i++) {
@@ -295,6 +296,7 @@ var drawing = () => {
             bullets[i].end();
         }
         shooting = 0;
+        win.play();
     }
     
 }
