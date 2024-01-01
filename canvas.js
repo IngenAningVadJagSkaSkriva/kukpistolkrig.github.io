@@ -495,7 +495,7 @@ var handleEnemys = () => {
                 heal.currentTime = 0;
                 heal.play();
                 player1.gunlength++;
-            } else {
+            } else if(enemys[i].clump == 0){
                 kill.currentTime = 0;
                 kill.play();
             }
