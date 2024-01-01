@@ -203,13 +203,13 @@ for(let i = 0; i < maxbullets; i++) {
 for(let i = 0; i < maxenemys; i++) {
     let a = RB(1,4)
     if(a == 1) {
-        enemys[i] = new enemy(0,RB(0,canvas.height),player1.x,player1.y,reaction,RB(1,3));
+        enemys[i] = new enemy(0,RB(0,canvas.height),player1.x,player1.y,reaction,RB(0,1));
     } else if(a == 2) {
-        enemys[i] = new enemy(canvas.width,RB(0,canvas.height),player1.x,player1.y,reaction,RB(1,3));
+        enemys[i] = new enemy(canvas.width,RB(0,canvas.height),player1.x,player1.y,reaction,RB(0,1));
     } else if(a == 3) {
-        enemys[i] = new enemy(RB(0,canvas.width),0,player1.x,player1.y,reaction,RB(1,3));
+        enemys[i] = new enemy(RB(0,canvas.width),0,player1.x,player1.y,reaction,RB(0,1));
     } else if(a == 4) {
-        enemys[i] = new enemy(RB(0,canvas.width),canvas.height,player1.x,player1.y,reaction,RB(1,3));
+        enemys[i] = new enemy(RB(0,canvas.width),canvas.height,player1.x,player1.y,reaction,RB(0,1));
     }
 }
 
@@ -495,9 +495,6 @@ var handleEnemys = () => {
                 heal.currentTime = 0;
                 heal.play();
                 player1.gunlength++;
-            } else if(enemys[i].clump == 0){
-                kill.currentTime = 0;
-                kill.play();
             }
             if(player1.gunlength >= player1.maxhealth && shooting == 0) {
                 shooting = 1;
@@ -511,6 +508,10 @@ var handleEnemys = () => {
                 setTimeout(() => {
                     shooting = 0;
                 },5000);
+            }
+            if(enemys[i].clump != 1){
+                kill.currentTime = 0;
+                kill.play();
             }
             if(a == 1 && b != 1) {
                 enemys[i].new(0 - canvas.width,RB(0,canvas.height),player1.x,player1.y,reaction,0);
