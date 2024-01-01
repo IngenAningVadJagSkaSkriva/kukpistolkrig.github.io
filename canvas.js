@@ -8,11 +8,21 @@ var maxbullets = 1000;
 var speed = 1;
 var reset2 = 0;
 var waves = 0;
-if(confirm("do you want easy mode?")) {
-    var maxenemys = 20;
-} else {
-    maxenemys = 50;
-    speed = 1.5;
+var choose = 0;
+var maxenemys = 0;
+while(choose == 0) {
+    if(confirm("do you want easy mode?")) {
+        maxenemys = 20;
+        choose = 1;
+    } else if(confirm("do you want hard mode?")){
+        maxenemys = 50;
+        speed = 1.5;
+        choose = 1;
+    } else if(confirm("do you want extreme mode?")) {
+        maxenemys = 100;
+        speed = 2;
+        choose = 1;
+    }
 }
 alert(maxenemys);
 var maxdistance = 10;
@@ -214,8 +224,10 @@ var drawing = () => {
     let see = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "grey";
-    if(maxenemys > 20) {
+    if(maxenemys == 50) {
         ctx.fillText("WAVE: "+waves+", HARD MODE!",0,canvas.height / 10,canvas.width / 2);
+    } else if(maxenemys == 100) {
+        ctx.fillText("WAVE: "+waves+", EXTREME!",0,canvas.height / 10,canvas.width / 2);
     } else {
         ctx.fillText("WAVE: "+waves+", easy",0,canvas.height / 10,canvas.width / 2);
     }
@@ -432,7 +444,11 @@ var handleEnemys = () => {
         if(map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 5 || map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 2) {
             let a = RB(1,4);
             let b = RB(1,3);
-            if(maxenemys > 30) b = RB(1,6);
+            if(maxenemys > 30) {
+                b = RB(1,6);
+            } else if(maxenemys > 50) {
+                b = RB(1,10);
+            }
             if(enemys[i].clump == 1 && player1.gunlength <= player1.maxhealth) player1.gunlength++;
             if(player1.gunlength >= player1.maxhealth && shooting == 0) {
                 shooting = 1;
