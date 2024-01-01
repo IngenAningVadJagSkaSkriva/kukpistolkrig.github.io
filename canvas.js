@@ -16,6 +16,8 @@ var heal = new Audio("heal.mp3");
 var win = new Audio("win.mp3");
 var Sshoot = [];
 var shooti = 0;
+var p = 1;
+var p2 = 1;
 for(let i = 0; i < 20; i++) {
     Sshoot[i] = new Audio("shoot.mp3");
 }
@@ -231,6 +233,12 @@ window.addEventListener('resize', () => {
 })
 
 var drawing = () => {
+    if(p == 1) {
+        ctx.fillStyle = "white";
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillText("CLICK TO START!",canvas.width / 4,canvas.height / 2,(canvas.width / 4) * 3);
+        return 0;
+    }
     let see = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "grey";
@@ -281,7 +289,7 @@ var drawing = () => {
             }
         }
     }
-    if(see == false && reset2 == 0) {
+    if(see == false && reset2 == 0 && p2 == 0) {
         reset2 = 1;
         waves++;
         setTimeout(() => {
@@ -333,14 +341,21 @@ var reset = () => {
 var keys = [];
 onkeydown = onkeyup = (e) => {
     keys[e.keyCode] = e.type == 'keydown';
-    if(keys[32]) {
+    if(keys[13]) { //enter
             if(player1.currentspeed == 0) {
                 player1.currentspeed = 2;
             } else if(player1.currentspeed > 0) {
                 player1.currentspeed = 0;
             }
-        keys[32] = 0;
+        keys[13] = 0;
     }
+    if(keys[32]) { //space
+        if(p == 0 && p2 == 0) {
+            p2 = 1;
+            p = 1;
+        }
+    }
+
 }
 
 var move = () => {
@@ -368,7 +383,19 @@ addEventListener("mousemove", (e) => {
     player1.goalY = test(player1.x,player1.y,mouse.x,mouse.y,"Y");
 })
 addEventListener("click", (e) => {
-    shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,2);
+    if(p == 1) {
+        p = 0;
+        setTimeout(() => {
+            map[1][1] = 6;
+            game();
+            drawing();
+        },1000)
+        setTimeout(() => {
+            p2 = 0;
+        },5000)
+    } else {
+        shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,2);
+    }
 })
 var handlebullets = () => {
         {for(let i = 0; i < maxbullets; i++) {
@@ -543,6 +570,10 @@ var boom = (pieces) => {
 
 //game
 var game = () => {
+    if(p == 1) {
+        map[1][1] = 6;
+        return 0;
+    }
     player1.ox = player1.x;
     player1.oy = player1.y;
     if(player1.speedX > player1.goalX) {
@@ -604,7 +635,6 @@ var game = () => {
         requestAnimationFrame(game());
     },1000/30);
 }
-
 game();
 drawing();
 setTimeout(() => {
@@ -612,3 +642,9 @@ setTimeout(() => {
     bomb.x = RB(0,canvas.width - bomb.width);
     bomb.y = RB(0,canvas.height - bomb.height)
 },10000)
+window.onblur = () => {
+    if(p == 0 && p2 == 0) {
+        p2 = 1;
+        p = 1;
+    }
+}
