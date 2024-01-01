@@ -113,8 +113,9 @@ class bullet {
         this.x += this.speedX;
         this.y += this.speedY;
         if(this.speed < 0.05) {
-            this.speedX = RB(-1,1);
-            this.speedY = RB(-1,1);
+            this.speedX = RB(-10,10) / 10;
+            this.speedY = RB(-10,10) / 10;
+            this.speed = pos(this.speedX) + pos(this.speedY);
         }
     }
     end() {
