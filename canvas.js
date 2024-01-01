@@ -389,11 +389,11 @@ addEventListener("click", (e) => {
             map[1][1] = 6;
             game();
             drawing();
-        },1000)
+        },500)
         setTimeout(() => {
             p2 = 0;
-        },5000)
-    } else {
+        },2500)
+    } else if(p2 != 1){
         shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,2);
     }
 })
