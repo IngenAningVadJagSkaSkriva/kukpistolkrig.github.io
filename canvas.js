@@ -10,6 +10,14 @@ var reset2 = 0;
 var waves = 0;
 var choose = 0;
 var maxenemys = 0;
+var damage = new Audio("damage.mp3");
+var kill = new Audio("kill.mp3");
+var heal = new Audio("heal.mp3");
+var Sshoot = [];
+var shooti = 0;
+for(let i = 0; i < 20; i++) {
+    Sshoot[i] = new Audio("shoot.mp3");
+}
 while(choose == 0) {
     if(confirm("Do you want easy mode?")) {
         maxenemys = 20;
@@ -339,6 +347,9 @@ var move = () => {
     player1.goalY = test(player1.x,player1.y,mouse.x,mouse.y,"Y");
 }
 var shoot = (x,y,speedX,speedY,size) => {
+    if(shooti >= 20) shooti = 0;
+    Sshoot[shooti].play();
+    shooti++;
     index++;
     if(index >= maxbullets) {
         index = 0;
@@ -449,7 +460,14 @@ var handleEnemys = () => {
             } else if(maxenemys > 50) {
                 b = RB(1,10);
             }
-            if(enemys[i].clump == 1 && player1.gunlength <= player1.maxhealth) player1.gunlength++;
+            if(enemys[i].clump == 1 && player1.gunlength <= player1.maxhealth) {
+                heal.currentTime = 0;
+                heal.play();
+                player1.gunlength++;
+            } else {
+                kill.currentTime = 0;
+                kill.play();
+            }
             if(player1.gunlength >= player1.maxhealth && shooting == 0) {
                 shooting = 1;
                 var shooter = setInterval(() => {
@@ -487,6 +505,8 @@ var handleEnemys = () => {
                 enemys[i].attack = 1;
             },2000);
             player1.gunlength--;
+            damage.currentTime = 0;
+            damage.play();
             if(player1.gunlength <= 0) {
                 reset();
             }
