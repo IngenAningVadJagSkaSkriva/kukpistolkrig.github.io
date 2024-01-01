@@ -36,6 +36,7 @@ while(choose == 0) {
     }
 }
 alert("To change difficulty just refresh the page!");
+var upgrade = maxenemys * 3;
 var maxdistance = 10;
 var reaction = 0.05;
 var player1 = {
@@ -53,7 +54,10 @@ var player1 = {
     changespeed: 5,
     currentspeed: 2,
     gunlength: 20,
-    maxhealth: 40
+    maxhealth: 40,
+    twoswords: false,
+    kills: 0,
+    killsuntilupgrade: 0
 }
 var bomb = {
     x: Math.floor(canvas.width / 4),
@@ -243,11 +247,11 @@ var drawing = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "grey";
     if(maxenemys == 50) {
-        ctx.fillText("WAVE: "+waves+", HARD MODE!",0,canvas.height / 10,canvas.width / 2);
+        ctx.fillText("WAVE: "+waves+", HARD MODE! "+"KILLS: "+player1.kills+", UPGRADE: "+player1.killsuntilupgrade+"/"+upgrade,0,canvas.height / 10,canvas.width);
     } else if(maxenemys == 100) {
-        ctx.fillText("WAVE: "+waves+", EXTREME!",0,canvas.height / 10,canvas.width / 2);
+        ctx.fillText("WAVE: "+waves+", EXTREME! "+"KILLS: "+player1.kills+", UPGRADE: "+player1.killsuntilupgrade+"/"+upgrade,0,canvas.height / 10,canvas.width);
     } else {
-        ctx.fillText("WAVE: "+waves+", easy",0,canvas.height / 10,canvas.width / 2);
+        ctx.fillText("WAVE: "+waves+", easy, "+"KILLS: "+player1.kills+", UPGRADE: "+player1.killsuntilupgrade+"/"+upgrade,0,canvas.height / 10,canvas.width);
     }
     for(let i = 0; i < canvas.height; i++) {
         for(let j = 0; j < canvas.width; j++) {
@@ -304,6 +308,7 @@ var drawing = () => {
             bullets[i].end();
         }
         shooting = 0;
+        player1.killsuntilupgrade = 0;
         win.play();
     }
     
@@ -335,6 +340,8 @@ var reset = () => {
     player1.x = Math.floor(canvas.width / 2);
     player1.y = Math.floor(canvas.height / 2);
     waves = 0;
+    player1.kills = 0;
+    player1.killsuntilupgrade = 0;
     alert("YOU LOSE!");
 }
 
@@ -495,6 +502,8 @@ var handleEnemys = () => {
                 heal.currentTime = 0;
                 heal.play();
                 player1.gunlength++;
+                player1.kills++;
+                player1.killsuntilupgrade++;
             }
             if(player1.gunlength >= player1.maxhealth && shooting == 0) {
                 shooting = 1;
@@ -509,7 +518,9 @@ var handleEnemys = () => {
                     shooting = 0;
                 },5000);
             }
-            if(enemys[i].clump != 1){
+            if(enemys[i].clump != 1 && enemys[i].x > 0 && enemys[i].x < canvas.width && enemys[i].y > 0 && enemys[i].y < canvas.height){
+                player1.kills++;
+                player1.killsuntilupgrade++;
                 kill.currentTime = 0;
                 kill.play();
             }
@@ -600,6 +611,20 @@ var game = () => {
     player1.y2 = Math.floor(player1.y);
     player1.x = player1.ox;
     player1.y = player1.oy;
+    if(player1.killsuntilupgrade >= upgrade) {
+        while(distance(player1.x,player1.y,player1.ox,player1.oy) <= player1.gunlength) {
+            player1.x -= player1.speedX;
+            player1.y -= player1.speedY;
+            for(let x = -1; x < 2; x++) {
+                for(let y = -1; y < 2; y++) {
+                    map[Math.floor(player1.y) + y][Math.floor(player1.x) + x] = 2;
+                }
+            }
+        }
+        player1.killsuntilupgrade = upgrade;
+        player1.x = player1.ox;
+        player1.y = player1.oy;
+    }
     player1.x += player1.speedX * player1.speed;
     player1.y += player1.speedY * player1.speed;
     if(player1.x > canvas.width) {
