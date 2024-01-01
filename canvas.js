@@ -11,20 +11,20 @@ var waves = 0;
 var choose = 0;
 var maxenemys = 0;
 while(choose == 0) {
-    if(confirm("do you want easy mode?")) {
+    if(confirm("Do you want easy mode?")) {
         maxenemys = 20;
         choose = 1;
-    } else if(confirm("do you want hard mode?")){
+    } else if(confirm("Do you want hard mode?")){
         maxenemys = 50;
         speed = 1.5;
         choose = 1;
-    } else if(confirm("do you want extreme mode?")) {
+    } else if(confirm("Do you want extreme mode?")) {
         maxenemys = 100;
         speed = 2;
         choose = 1;
     }
 }
-alert(maxenemys);
+alert("To change difficulty just refresh the page!");
 var maxdistance = 10;
 var reaction = 0.05;
 var player1 = {
