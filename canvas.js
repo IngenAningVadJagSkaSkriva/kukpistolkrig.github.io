@@ -349,6 +349,7 @@ var move = () => {
 }
 var shoot = (x,y,speedX,speedY,size) => {
     if(shooti >= 20) shooti = 0;
+    Sshoot[shooti].currentTime = 0;
     Sshoot[shooti].play();
     shooti++;
     index++;
