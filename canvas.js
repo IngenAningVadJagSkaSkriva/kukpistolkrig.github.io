@@ -14,6 +14,7 @@ var damage = new Audio("damage.mp3");
 var kill = new Audio("kill.mp3");
 var heal = new Audio("heal.mp3");
 var win = new Audio("win.mp3");
+var eshoot = new Audio("eshoot.mp3");
 var Sshoot = [];
 var shooti = 0;
 var p = 1;
@@ -114,6 +115,7 @@ class bullet {
         this.speedY = speedY;
         this.index = index;
         this.size = 2;
+        this.evil = 0;
         this.speed = pos(this.speedX) + pos(this.speedY);
     }
     update() {
@@ -131,9 +133,10 @@ class bullet {
         this.speedX = 0;
         this.speedY = 0;
     }
-    new(x1,y1,speedX1,speedY1,index1,speed,size) {
+    new(x1,y1,speedX1,speedY1,index1,speed,size,evil) {
         this.x = x1;
         this.y = y1;
+        this.evil = evil;
         this.speedX = speedX1 * speed;
         this.speedY = speedY1 * speed;
         this.index = index1;
@@ -145,6 +148,8 @@ class enemy {
     constructor(x,y,x2,y2,reaction,clump,supe) {
         this.x = x;
         this.y = y;
+        this.x22 = x;
+        this.y22 = y;
         this.ox = x;
         this.oy = y;
         this.x2 = x2;
@@ -157,8 +162,28 @@ class enemy {
         this.goalX = test(this.x,this.y,this.x2,this.y2,"X");
         this.goalY = test(this.x,this.y,this.x2,this.y2,"Y");
         this.clump = clump;
+        if(RB(1,30) == 1) {
+            this.supe = 0;
+            this.clump = 0;
+            this.gunner = 1;
+        } else {
+            this.gunner = 0;
+        }
     }
     update(x2,y2,speed) {
+        if(this.gunner == 1) {
+            speed = 0.5;
+            if(this.x > canvas.width) {
+                this.x = canvas.width - 1;
+            } else if(this.x < 0) {
+                this.x = 1;
+            }
+            if(this.y > canvas.height) {
+                this.y = canvas.height - 1;
+            } else if(this.y < 0) {
+                this.y = 1;
+            }
+        }
         this.ox = this.x;
         this.oy = this.y;
         this.x2 = x2;
@@ -186,6 +211,8 @@ class enemy {
     new(x,y,x2,y2,reaction,clump) {
         this.x = x;
         this.y = y;
+        this.x22 = x;
+        this.y22 = y;
         this.ox = x;
         this.oy = y;
         this.x2 = x2;
@@ -197,6 +224,14 @@ class enemy {
         this.goalX = test(this.x,this.y,this.x2,this.y2,"X");
         this.goalY = test(this.x,this.y,this.x2,this.y2,"Y");
         this.clump = clump;
+        if(RB(1,30) == 1) {
+            this.supe = 0;
+            this.clump = 0;
+            this.gunner = 1;
+
+        } else {
+            this.gunner = 0;
+        }
     }
 }
 var enemys = []
@@ -290,6 +325,18 @@ var drawing = () => {
                 ctx.fillStyle = "red";
                 ctx.fillRect(j,i,1,1);
                 map[i][j] = 0;
+            } else if(map[i][j] == 8) {
+                ctx.fillStyle = "grey";
+                ctx.fillRect(j,i,1,1);
+                map[i][j] = 0;
+            } else if(map[i][j] == 9) {
+                if(RB(1,2) == 1) {
+                    ctx.fillStyle = "grey";
+                } else {
+                    ctx.fillStyle = "white";
+                }
+                ctx.fillRect(j,i,1,1);
+                map[i][j] = 0;
             }
         }
     }
@@ -371,16 +418,21 @@ var move = () => {
     player1.goalX = test(player1.x,player1.y,mouse.x,mouse.y,"X");
     player1.goalY = test(player1.x,player1.y,mouse.x,mouse.y,"Y");
 }
-var shoot = (x,y,speedX,speedY,size) => {
+var shoot = (x,y,speedX,speedY,size,evil) => {
     if(shooti >= 20) shooti = 0;
-    Sshoot[shooti].currentTime = 0;
-    Sshoot[shooti].play();
+    if(evil != 1) {
+        Sshoot[shooti].currentTime = 0;
+        Sshoot[shooti].play();
+    } else {
+        eshoot.currentTime = 0;
+        eshoot.play();
+    }
     shooti++;
     index++;
     if(index >= maxbullets) {
         index = 0;
     }
-    bullets[index].new(x,y,speedX,speedY,0,5,size);
+    bullets[index].new(x,y,speedX,speedY,0,5,size,evil);
 }
 var shooting = 0;
 addEventListener("mousemove", (e) => {
@@ -401,7 +453,7 @@ addEventListener("click", (e) => {
             p2 = 0;
         },2500)
     } else if(p2 != 1){
-        shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,2);
+        shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,2,0);
     }
 })
 var handlebullets = () => {
@@ -421,10 +473,26 @@ var handlebullets = () => {
             bullets[i].end();
             //bullets[i].y = canvas.height;
         }
+        if(bullets[i].evil == 1) {
+            if(map[Math.floor(bullets[i].y)][Math.floor(bullets[i].x)] == 2 || map[Math.floor(bullets[i].y)][Math.floor(bullets[i].x)] == 5) {
+                bullets[i].end();
+            } else if(map[Math.floor(bullets[i].y)][Math.floor(bullets[i].x)] == 1) {
+                player1.gunlength--;
+                damage.currentTime = 0;
+                damage.play();
+                if(player1.gunlength <= 0) {
+                    reset();
+                }
+            }
+        }
         for(let x = bullets[i].size * -1;x < bullets[i].size; x++) {
             for(let y = bullets[i].size * -1; y < bullets[i].size; y++) {
-                if(map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 4) boom(20);
-                map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] = 5;
+                if(map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 4 && bullets[i].evil != 1) boom(20);
+                if(bullets[i].evil != 1) {
+                    map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] = 5;
+                } else {
+                    map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] = 9;
+                }
             }
         }
     }
@@ -508,7 +576,7 @@ var handleEnemys = () => {
             if(player1.gunlength >= player1.maxhealth && shooting == 0) {
                 shooting = 1;
                 var shooter = setInterval(() => {
-                    shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,3);
+                    shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,3,0);
                     if(shooting == 0) {
                         clearInterval(shooter);
                         player1.gunlength = player1.maxhealth / 2;
@@ -554,6 +622,32 @@ var handleEnemys = () => {
                 reset();
             }
         }
+        if(enemys[i].gunner == 1) {
+            for(let yy = -3; yy < 3; yy++) {
+                for(let xx = -3; xx < 3; xx++) {
+                    map[Math.floor(enemys[i].y) + yy][Math.floor(enemys[i].x) + xx] = 6; 
+                }
+            }
+            while(distance(enemys[i].x,enemys[i].y,enemys[i].ox,enemys[i].oy) <= 10) {
+                enemys[i].x += enemys[i].speedX;
+                enemys[i].y += enemys[i].speedY;
+                for(let x = -1; x < 2; x++) {
+                    for(let y = -1; y < 2; y++) {
+                        map[Math.floor(enemys[i].y) + y][Math.floor(enemys[i].x) + x] = 8;
+                    }
+                }
+            }
+            enemys[i].x22 = Math.floor(enemys[i].x);
+            enemys[i].y22 = Math.floor(enemys[i].y);
+            enemys[i].x = enemys[i].ox;
+            enemys[i].y = enemys[i].oy;
+            enemys[i].x += enemys[i].speedX * 0.5;
+            enemys[i].y += enemys[i].speedY * 0.5;
+            if(RB(1,25) == 1) {
+                shoot(enemys[i].x22,enemys[i].y22,enemys[i].speedX,enemys[i].speedY,2,1)
+            }
+            map[enemys[i].y22][enemys[i].x22] = 3;
+        }
         if(enemys[i].clump == 1) {
             map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] = 7;
         } else if(enemys[i].supe == 1){
@@ -570,7 +664,7 @@ var handleEnemys = () => {
 var boom = (pieces) => {
     if(bomb.active == false) return 0;
     for(let i = 0; i < pieces; i++) {
-        shoot(bomb.x,bomb.y,RB(-15,15) / 10,RB(-15,15) / 10,5);
+        shoot(bomb.x,bomb.y,RB(-15,15) / 10,RB(-15,15) / 10,5,0);
     }
     bomb.active = false;
     setTimeout(() => {
