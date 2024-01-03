@@ -265,10 +265,15 @@ var array2D = (y,x) => {
 var map = array2D(canvas.height * 3,canvas.width * 3);
 var map2 = array2D(canvas.height * 3,canvas.width * 3);
 
-
+var pause = () => {
+    if(p == 0 && p2 == 0) {
+        p2 = 1;
+        p = 1;
+    }
+}
 
 window.addEventListener('resize', () => {
-    drawing();
+    pause();
 })
 
 var drawing = () => {
@@ -408,10 +413,7 @@ onkeydown = onkeyup = (e) => {
         keys[13] = 0;
     }
     if(keys[32]) { //space
-        if(p == 0 && p2 == 0) {
-            p2 = 1;
-            p = 1;
-        }
+        pause();
     }
 
 }
@@ -796,8 +798,5 @@ setTimeout(() => {
     bomb.y = RB(0,canvas.height - bomb.height)
 },10000)
 window.onblur = () => {
-    if(p == 0 && p2 == 0) {
-        p2 = 1;
-        p = 1;
-    }
+    pause();
 }
