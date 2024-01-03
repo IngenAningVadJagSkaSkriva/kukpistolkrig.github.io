@@ -4,7 +4,7 @@ canvas.height = 200;
 canvas.width = canvas.height * 2;
 var check = 0;
 var index = 0;
-var maxbullets = 1000;
+var maxbullets = 5000;
 var speed = 1;
 var reset2 = 0;
 var waves = 0;
@@ -30,7 +30,7 @@ while(choose == 0) {
         maxenemys = 50;
         speed = 1.5;
         choose = 1;
-    } else if(confirm("Do you want extreme mode?")) {
+    } else if(confirm("Do you want impossible mode?")) {
         maxenemys = 100;
         speed = 2;
         choose = 1;
@@ -174,14 +174,14 @@ class enemy {
         if(this.gunner == 1) {
             speed = 0.5;
             if(this.x > canvas.width) {
-                this.x = canvas.width - 1;
+                this.x = canvas.width - 10;
             } else if(this.x < 0) {
-                this.x = 1;
+                this.x = 10;
             }
             if(this.y > canvas.height) {
-                this.y = canvas.height - 1;
+                this.y = canvas.height - 10;
             } else if(this.y < 0) {
-                this.y = 1;
+                this.y = 10;
             }
         }
         this.ox = this.x;
@@ -224,7 +224,7 @@ class enemy {
         this.goalX = test(this.x,this.y,this.x2,this.y2,"X");
         this.goalY = test(this.x,this.y,this.x2,this.y2,"Y");
         this.clump = clump;
-        if(RB(1,30) == 1) {
+        if(RB(1,20) == 1) {
             this.supe = 0;
             this.clump = 0;
             this.gunner = 1;
@@ -284,12 +284,13 @@ var drawing = () => {
     if(maxenemys == 50) {
         ctx.fillText("WAVE: "+waves+", HARD MODE! "+"KILLS: "+player1.kills+", UPGRADE: "+player1.killsuntilupgrade+"/"+upgrade,0,canvas.height / 10,canvas.width);
     } else if(maxenemys == 100) {
-        ctx.fillText("WAVE: "+waves+", EXTREME! "+"KILLS: "+player1.kills+", UPGRADE: "+player1.killsuntilupgrade+"/"+upgrade,0,canvas.height / 10,canvas.width);
+        ctx.fillText("WAVE: "+waves+", IMPOSSIBLE! "+"KILLS: "+player1.kills+", UPGRADE: "+player1.killsuntilupgrade+"/"+upgrade,0,canvas.height / 10,canvas.width);
     } else {
         ctx.fillText("WAVE: "+waves+", easy, "+"KILLS: "+player1.kills+", UPGRADE: "+player1.killsuntilupgrade+"/"+upgrade,0,canvas.height / 10,canvas.width);
     }
     for(let i = 0; i < canvas.height; i++) {
         for(let j = 0; j < canvas.width; j++) {
+            map2[i][j] = map[i][j];
             if(map[i][j] == 1) {
                 ctx.fillStyle = "red";
                 ctx.fillRect(j,i,1,1);
@@ -383,6 +384,9 @@ var reset = () => {
                 enemys[i].new(RB(0,canvas.width),canvas.height,player1.x,player1.y,reaction,1);
             }
     }
+    for(let i = 0; i < maxbullets; i++) {
+        bullets[i].end();
+    }
     player1.gunlength = 20;
     player1.x = Math.floor(canvas.width / 2);
     player1.y = Math.floor(canvas.height / 2);
@@ -420,10 +424,10 @@ var move = () => {
 }
 var shoot = (x,y,speedX,speedY,size,evil) => {
     if(shooti >= 20) shooti = 0;
-    if(evil != 1) {
+    if(evil != 1 && size > 1) {
         Sshoot[shooti].currentTime = 0;
         Sshoot[shooti].play();
-    } else {
+    } else if(size > 1){
         eshoot.currentTime = 0;
         eshoot.play();
     }
@@ -474,7 +478,10 @@ var handlebullets = () => {
             //bullets[i].y = canvas.height;
         }
         if(bullets[i].evil == 1) {
-            if(map[Math.floor(bullets[i].y)][Math.floor(bullets[i].x)] == 2 || map[Math.floor(bullets[i].y)][Math.floor(bullets[i].x)] == 5) {
+            if((map[Math.floor(bullets[i].y)][Math.floor(bullets[i].x)] == 2 || map[Math.floor(bullets[i].y)][Math.floor(bullets[i].x)] == 5) && bullets[i].size > 1) {
+                for(let a = 0; a < 5; a++) {
+                    shoot(bullets[i].x,bullets[i].y,(bullets[i].speedX + RB(-10,10) / 10)*0.25,(bullets[i].speedY + RB(-10,10) / 10)*0.25,1,0);
+                }
                 bullets[i].end();
             } else if(map[Math.floor(bullets[i].y)][Math.floor(bullets[i].x)] == 1) {
                 player1.gunlength--;
@@ -487,7 +494,15 @@ var handlebullets = () => {
         }
         for(let x = bullets[i].size * -1;x < bullets[i].size; x++) {
             for(let y = bullets[i].size * -1; y < bullets[i].size; y++) {
-                if(map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 4 && bullets[i].evil != 1) boom(20);
+                if(map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 4 && bullets[i].evil != 1) {
+                    boom(20);
+                }
+                if((map2[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 8 && bullets[i].evil != 1) && bullets[i].size > 1) {
+                    for(let a = 0; a < 5; a++) {
+                        shoot(bullets[i].x,bullets[i].y,(bullets[i].speedX + RB(-10,10) / 10)*0.25,(bullets[i].speedY + RB(-10,10) / 10)*0.25,1,1);
+                    }
+                    bullets[i].end();
+                }
                 if(bullets[i].evil != 1) {
                     map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] = 5;
                 } else {
@@ -497,6 +512,63 @@ var handlebullets = () => {
         }
     }
     }
+}
+var enemydie = (i) => {
+    let a = RB(1,4);
+            let b = RB(1,3);
+            if(maxenemys > 30) {
+                b = RB(1,5);
+            } else if(maxenemys > 50) {
+                b = RB(1,10);
+            }
+            if(enemys[i].clump == 1 && player1.gunlength <= player1.maxhealth) {
+                heal.currentTime = 0;
+                heal.play();
+                player1.gunlength++;
+                player1.kills++;
+                player1.killsuntilupgrade++;
+            }
+            if(player1.gunlength >= player1.maxhealth && shooting == 0) {
+                shooting = 1;
+                var shooter = setInterval(() => {
+                    shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,3,0);
+                    if(shooting == 0) {
+                        clearInterval(shooter);
+                        player1.gunlength = player1.maxhealth / 2;
+                    }
+                },1000/30)
+                setTimeout(() => {
+                    shooting = 0;
+                },5000);
+            }
+            if(enemys[i].clump != 1 && enemys[i].x > 0 && enemys[i].x < canvas.width && enemys[i].y > 0 && enemys[i].y < canvas.height){
+                player1.kills++;
+                player1.killsuntilupgrade++;
+                kill.currentTime = 0;
+                kill.play();
+}
+if(enemys[i].supe == 1 && enemys[i].x > 0 && enemys[i].x < canvas.width && enemys[i].y > 0 && enemys[i].y < canvas.height) {
+    for(let a = 0; a < 5; a++) {
+        shoot(enemys[i].x,enemys[i].y,RB(-10,10) / 10,RB(-10,10) / 10,1,1);
+    }
+}
+if(a == 1 && b != 1) {
+    enemys[i].new(0 - canvas.width,RB(0,canvas.height),player1.x,player1.y,reaction,0);
+} else if(a == 2 && b != 1) {
+    enemys[i].new(canvas.width * 2,RB(0,canvas.height),player1.x,player1.y,reaction,0);
+} else if(a == 3 && b != 1) {
+    enemys[i].new(RB(0,canvas.width),0 - canvas.height,player1.x,player1.y,reaction,0);
+} else if(a == 4 && b != 1) {
+    enemys[i].new(RB(0,canvas.width),canvas.height * 2,player1.x,player1.y,reaction,0);
+} else if(a == 1 && b == 1) { // clumps
+    enemys[i].new(0,RB(0,canvas.height),player1.x,player1.y,reaction,1);
+} else if(a == 2) {
+    enemys[i].new(canvas.width,RB(0,canvas.height),player1.x,player1.y,reaction,1);
+} else if(a == 3) {
+    enemys[i].new(RB(0,canvas.width),0,player1.x,player1.y,reaction,1);
+} else if(a == 4) {
+    enemys[i].new(RB(0,canvas.width),canvas.height,player1.x,player1.y,reaction,1);
+}
 }
 var handleEnemys = () => {
     for(let i = 0; i < maxenemys; i++) {
@@ -558,56 +630,17 @@ var handleEnemys = () => {
                 }
             }
         }
-        if(map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 5 || map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 2) {
-            let a = RB(1,4);
-            let b = RB(1,3);
-            if(maxenemys > 30) {
-                b = RB(1,6);
-            } else if(maxenemys > 50) {
-                b = RB(1,10);
+        if(enemys[i].gunner != 1) {
+            if(map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 5 || map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 2) {
+                enemydie(i);
             }
-            if(enemys[i].clump == 1 && player1.gunlength <= player1.maxhealth) {
-                heal.currentTime = 0;
-                heal.play();
-                player1.gunlength++;
-                player1.kills++;
-                player1.killsuntilupgrade++;
-            }
-            if(player1.gunlength >= player1.maxhealth && shooting == 0) {
-                shooting = 1;
-                var shooter = setInterval(() => {
-                    shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,3,0);
-                    if(shooting == 0) {
-                        clearInterval(shooter);
-                        player1.gunlength = player1.maxhealth / 2;
+        } else {
+            for(let y = -3; y < 3; y++) {
+                for(let x = -3; x < 3; x++) {
+                    if(map[Math.floor(enemys[i].y) + y][Math.floor(enemys[i].x) + x] == 5 || map[Math.floor(enemys[i].y) + y][Math.floor(enemys[i].x) + x] == 2) {
+                        enemydie(i);
                     }
-                },1000/30)
-                setTimeout(() => {
-                    shooting = 0;
-                },5000);
-            }
-            if(enemys[i].clump != 1 && enemys[i].x > 0 && enemys[i].x < canvas.width && enemys[i].y > 0 && enemys[i].y < canvas.height){
-                player1.kills++;
-                player1.killsuntilupgrade++;
-                kill.currentTime = 0;
-                kill.play();
-            }
-            if(a == 1 && b != 1) {
-                enemys[i].new(0 - canvas.width,RB(0,canvas.height),player1.x,player1.y,reaction,0);
-            } else if(a == 2 && b != 1) {
-                enemys[i].new(canvas.width * 2,RB(0,canvas.height),player1.x,player1.y,reaction,0);
-            } else if(a == 3 && b != 1) {
-                enemys[i].new(RB(0,canvas.width),0 - canvas.height,player1.x,player1.y,reaction,0);
-            } else if(a == 4 && b != 1) {
-                enemys[i].new(RB(0,canvas.width),canvas.height * 2,player1.x,player1.y,reaction,0);
-            } else if(a == 1 && b == 1) { // clumps
-                enemys[i].new(0,RB(0,canvas.height),player1.x,player1.y,reaction,1);
-            } else if(a == 2) {
-                enemys[i].new(canvas.width,RB(0,canvas.height),player1.x,player1.y,reaction,1);
-            } else if(a == 3) {
-                enemys[i].new(RB(0,canvas.width),0,player1.x,player1.y,reaction,1);
-            } else if(a == 4) {
-                enemys[i].new(RB(0,canvas.width),canvas.height,player1.x,player1.y,reaction,1);
+                }
             }
         }
         if(map[Math.floor(enemys[i].y)][Math.floor(enemys[i].x)] == 1 && enemys[i].attack == 1) {
@@ -643,7 +676,7 @@ var handleEnemys = () => {
             enemys[i].y = enemys[i].oy;
             enemys[i].x += enemys[i].speedX * 0.5;
             enemys[i].y += enemys[i].speedY * 0.5;
-            if(RB(1,25) == 1) {
+            if(RB(1,10) == 1) {
                 shoot(enemys[i].x22,enemys[i].y22,enemys[i].speedX,enemys[i].speedY,2,1)
             }
             map[enemys[i].y22][enemys[i].x22] = 3;
