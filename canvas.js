@@ -58,7 +58,14 @@ var player1 = {
     maxhealth: 40,
     twoswords: false,
     kills: 0,
-    killsuntilupgrade: 0
+    killsuntilupgrade: 0,
+    sprite: [
+        [2,1,1,1,2],
+        [1,3,1,3,1],
+        [1,1,1,1,1],
+        [1,3,1,3,1],
+        [2,1,1,1,2]
+    ]
 }
 var bomb = {
     x: Math.floor(canvas.width / 4),
@@ -284,6 +291,7 @@ var drawing = () => {
         return 0;
     }
     let see = false;
+    let check = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "grey";
     if(maxenemys == 50) {
@@ -297,11 +305,41 @@ var drawing = () => {
         for(let j = 0; j < canvas.width; j++) {
             map2[i][j] = map[i][j];
             if(map[i][j] == 1) {
-                ctx.fillStyle = "red";
-                ctx.fillRect(j,i,1,1);
+                if(check == false) {
+                    for(let y = 0; y < 5; y++) {
+                        for(let x = 0; x < 5; x++) {
+                            switch(player1.sprite[x][y]) {
+                                case 1:
+                                    ctx.fillStyle = "rgb("+(player1.gunlength/player1.maxhealth)*255+", 0, 0)";
+                                    break;
+                                case 2:
+                                    ctx.fillStyle = "white";
+                                    break;
+                                case 3:
+                                    if(RB(1,3) == 1) {
+                                        ctx.fillStyle = "red";
+                                    } else if(RB(1,3) == 2) {
+                                        ctx.fillStyle = "yellow";
+                                    } else {
+                                        ctx.fillStyle = "blue";
+                                    }
+                            }
+                            if(player1.sprite != 0) ctx.fillRect(j + x, i + y,1,1);
+                        }
+                    }
+                }
+                check = true;
                 map[i][j] = 0;
             } else if(map[i][j] == 2) {
-                ctx.fillStyle = "white";
+                let count = 0;
+                for(let y = -1; y < 2; y++) {
+                    for(let x = -1; x < 2; x++) {
+                        if((map2[i + y][j + x] == 2 || map[i + y][j + x] == 2) && (y != 0 && x != 0)) count++;
+                    }
+                }
+                if(count >= 4) {
+                    ctx.fillStyle = "white";
+                } else ctx.fillStyle = "grey";
                 ctx.fillRect(j,i,1,1);
                 map[i][j] = 0;
             } else if(map[i][j] == 3) {
