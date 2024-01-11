@@ -285,8 +285,10 @@ window.addEventListener('resize', () => {
 
 var drawing = () => {
     if(p == 1) {
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "yellow";
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillText("KUK PISTOL KRIG!",canvas.width / 5, canvas.height / 4,(canvas.width / 4) * 3);
+        ctx.fillStyle = "white";
         ctx.fillText("CLICK TO START!",canvas.width / 4,canvas.height / 2,(canvas.width / 4) * 3);
         return 0;
     }
