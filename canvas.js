@@ -772,6 +772,19 @@ var game = () => {
         map[1][1] = 6;
         return 0;
     }
+    if(RB(1,200) == 1) {
+        let min = RB(0,canvas.width);
+        let max = RB(min,canvas.width);
+        if(RB(1,2) == 1) {
+            for(let i = min; i < max; i++) {
+                shoot(i,4,0,0.25,1,1,0);
+            }
+        } else {
+            for(let i = min; i < max; i++) {
+                shoot(i,canvas.height - 4,0,-0.25,1,1,0);
+            }
+        }
+    }
     player1.ox = player1.x;
     player1.oy = player1.y;
     if(player1.speedX > player1.goalX) {
