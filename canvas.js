@@ -51,6 +51,8 @@ var player1 = {
     goalY: 1,
     speedX: 1,
     speedY: 1,
+    recoilX: 0,
+    recoilY: 0,
     speed: 2,
     changespeed: 5,
     currentspeed: 2,
@@ -123,6 +125,7 @@ class bullet {
         this.index = index;
         this.size = 2;
         this.evil = 0;
+        this.shotgun = 0;
         this.speed = pos(this.speedX) + pos(this.speedY);
     }
     update() {
@@ -140,9 +143,10 @@ class bullet {
         this.speedX = 0;
         this.speedY = 0;
     }
-    new(x1,y1,speedX1,speedY1,index1,speed,size,evil) {
+    new(x1,y1,speedX1,speedY1,index1,speed,size,evil,shotgun) {
         this.x = x1;
         this.y = y1;
+        this.shotgun = shotgun;
         this.evil = evil;
         this.speedX = speedX1 * speed;
         this.speedY = speedY1 * speed;
@@ -290,6 +294,10 @@ var drawing = () => {
         ctx.fillText("KUK PISTOL KRIG!",canvas.width / 5, canvas.height / 4,(canvas.width / 4) * 3);
         ctx.fillStyle = "white";
         ctx.fillText("CLICK TO START!",canvas.width / 4,canvas.height / 2,(canvas.width / 4) * 3);
+        ctx.fillStyle = "rgb("+RB(10,255)+","+RB(10,255)+","+RB(10,255)+")";
+        ctx.fillText("CLICK TO SHOOT!",canvas.width / 1.5,canvas.height / 5,canvas.width);
+        ctx.fillText("RIGHT CLICK FOR SHOTGUN AND SPEED!",canvas.width / 2.1,canvas.height / 4,canvas.width);
+        ctx.fillText("SHOTGUN USES YOUR HEALTH AS AMMO!",canvas.width / 2.1,(canvas.height / 4) * 1.2,canvas.width); 
         return 0;
     }
     let see = false;
@@ -318,13 +326,7 @@ var drawing = () => {
                                     ctx.fillStyle = "white";
                                     break;
                                 case 3:
-                                    if(RB(1,3) == 1) {
-                                        ctx.fillStyle = "red";
-                                    } else if(RB(1,3) == 2) {
-                                        ctx.fillStyle = "yellow";
-                                    } else {
-                                        ctx.fillStyle = "blue";
-                                    }
+                                    ctx.fillStyle = "rgb("+RB(0,255)+","+RB(0,255)+","+RB(0,255)+")";
                             }
                             if(player1.sprite != 0) ctx.fillRect(j + x, i + y,1,1);
                         }
@@ -464,7 +466,7 @@ var move = () => {
     player1.goalX = test(player1.x,player1.y,mouse.x,mouse.y,"X");
     player1.goalY = test(player1.x,player1.y,mouse.x,mouse.y,"Y");
 }
-var shoot = (x,y,speedX,speedY,size,evil) => {
+var shoot = (x,y,speedX,speedY,size,evil,shotgun) => {
     if(shooti >= 20) shooti = 0;
     if(evil != 1 && size > 1) {
         Sshoot[shooti].currentTime = 0;
@@ -478,7 +480,7 @@ var shoot = (x,y,speedX,speedY,size,evil) => {
     if(index >= maxbullets) {
         index = 0;
     }
-    bullets[index].new(x,y,speedX,speedY,0,5,size,evil);
+    bullets[index].new(x,y,speedX,speedY,0,5,size,evil,shotgun);
 }
 var shooting = 0;
 addEventListener("mousemove", (e) => {
@@ -502,6 +504,21 @@ addEventListener("click", (e) => {
         shoot(player1.x2,player1.y2,player1.speedX,player1.speedY,2,0);
     }
 })
+addEventListener("contextmenu",(e) => {
+    e.preventDefault();
+    player1.recoilX = player1.speedX * -7;
+    player1.recoilY = player1.speedY * -7;
+    player1.gunlength -= 0.4;
+    damage.currentTime = 0;
+            damage.play();
+            if(player1.gunlength <= 0) {
+                reset();
+            }
+    for(let i = 0; i < player1.gunlength / 10; i++) {
+        shoot(player1.x2,player1.y2,player1.speedX + RB(-5,5) / 100,player1.speedY + RB(-5,5) / 100,1,0,1);
+    }
+    return false;
+},false)
 var handlebullets = () => {
         {for(let i = 0; i < maxbullets; i++) {
         bullets[i].update();
@@ -539,7 +556,7 @@ var handlebullets = () => {
                 if(map[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 4 && bullets[i].evil != 1) {
                     boom(20);
                 }
-                if((map2[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 8 && bullets[i].evil != 1) && bullets[i].size > 1) {
+                if((map2[Math.floor(bullets[i].y) + y][Math.floor(bullets[i].x) + x] == 8 && bullets[i].evil != 1) && (bullets[i].size > 1 || bullets[i].shotgun == 1)) {
                     for(let a = 0; a < 5; a++) {
                         shoot(bullets[i].x,bullets[i].y,(bullets[i].speedX + RB(-10,10) / 10)*0.25,(bullets[i].speedY + RB(-10,10) / 10)*0.25,1,1);
                     }
@@ -794,8 +811,18 @@ var game = () => {
         player1.x = player1.ox;
         player1.y = player1.oy;
     }
-    player1.x += player1.speedX * player1.speed;
-    player1.y += player1.speedY * player1.speed;
+    player1.x += player1.speedX * player1.speed + player1.recoilX;
+    player1.y += player1.speedY * player1.speed + player1.recoilY;
+    if(player1.recoilX < 0) {
+        player1.recoilX += 0.1;
+    } else if(player1.recoilX > 0) {
+        player1.recoilX -= 0.1;
+    }
+    if(player1.recoilY < 0) {
+        player1.recoilY += 0.1;
+    } else if(player1.recoilY > 0) {
+        player1.recoilY -= 0.1;
+    }
     if(player1.x > canvas.width) {
         player1.x = 0;
     } else if(player1.x < 0) {
