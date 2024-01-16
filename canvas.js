@@ -506,15 +506,15 @@ addEventListener("click", (e) => {
 })
 addEventListener("contextmenu",(e) => {
     e.preventDefault();
-    player1.recoilX = player1.speedX * -7;
-    player1.recoilY = player1.speedY * -7;
+    player1.recoilX = player1.speedX * -8;
+    player1.recoilY = player1.speedY * -8;
     player1.gunlength -= 0.4;
     damage.currentTime = 0;
             damage.play();
             if(player1.gunlength <= 0) {
                 reset();
             }
-    for(let i = 0; i < player1.gunlength / 10; i++) {
+    for(let i = 0; i < player1.gunlength / 5; i++) {
         shoot(player1.x2,player1.y2,player1.speedX + RB(-5,5) / 100,player1.speedY + RB(-5,5) / 100,1,0,1);
     }
     return false;
