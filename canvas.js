@@ -537,7 +537,7 @@ addEventListener("contextmenu",(e) => {
     e.preventDefault();
     player1.recoilX = player1.speedX * -8;
     player1.recoilY = player1.speedY * -8;
-    player1.gunlength -= 0.4;
+    player1.gunlength -= 0.3;
     damage.currentTime = 0;
             damage.play();
             if(player1.gunlength <= 0) {
