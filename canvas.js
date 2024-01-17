@@ -265,7 +265,7 @@ class boss {
 }
 var enemys = []
 var bullets = [];
-var boss1 = new boss(canvas.height * -1,canvas.width * -1,20,20,0);
+var boss1 = new boss(canvas.height * -1,canvas.width * -1,30,30,0);
 for(let i = 0; i < maxbullets; i++) {
     bullets[i] = new bullet(-5,-5,0,0,0);
 }
