@@ -245,8 +245,27 @@ class enemy {
         }
     }
 }
+class boss {
+    constructor(y,x,health,maxhealth,fight) {
+        this.y = y;
+        this.x = x;
+        this.speedX = 0;
+        this.speedY = 0;
+        this.health = health;
+        this.maxhealth = maxhealth;
+        this.fight = fight;
+        this.death = 0;
+    }
+    update(speedX,speedY) {
+        this.speedX = speedX;
+        this.speedY = speedY;
+        this.x += this.speedX;
+        this.y += this.speedY;
+    }
+}
 var enemys = []
 var bullets = [];
+var boss1 = new boss(canvas.height * -1,canvas.width * -1,20,20,0);
 for(let i = 0; i < maxbullets; i++) {
     bullets[i] = new bullet(-5,-5,0,0,0);
 }
@@ -385,12 +404,17 @@ var drawing = () => {
                 }
                 ctx.fillRect(j,i,1,1);
                 map[i][j] = 0;
+            } else if(map[i][j] == 10) {
+                ctx.fillStyle = "rgb("+RB(0,(boss1.health/boss1.maxhealth)*255)+",0,0)";
+                ctx.fillRect(j,i,1,1);
+                map[i][j] = 0;
             }
         }
     }
     if(see == false && reset2 == 0 && p2 == 0) {
         reset2 = 1;
         waves++;
+        boss1.death = 0;
         setTimeout(() => {
             reset2 = 0;
         },5000)
@@ -440,6 +464,11 @@ var reset = () => {
     waves = 0;
     player1.kills = 0;
     player1.killsuntilupgrade = 0;
+    boss1.fight = 0;
+                        boss1.x = canvas.width * -1;
+                        boss1.y = canvas.height * -1;
+                        boss1.health = boss1.maxhealth;
+                        boss1.death = 0;
     alert("YOU LOSE!");
 }
 
@@ -630,6 +659,51 @@ if(a == 1 && b != 1) {
 }
 }
 var handleEnemys = () => {
+    if(boss1.fight == 1 && boss1.death == 0) {
+        let speedX = test(boss1.x,boss1.y,player1.x,player1.y,"X") * 0.9;
+        let speedY = test(boss1.x,boss1.y,player1.x,player1.y,"Y") * 0.9;
+        let x2 = boss1.x;
+        let y2 = boss1.y;
+        boss1.update(speedX,speedY);
+        while(distance(x2,y2,boss1.x,boss1.y) < 40 * (boss1.health / boss1.maxhealth)) {
+            x2 += speedX;
+            y2 += speedY;
+            for(let i = -2; i < 3; i++) {
+                for(let j = -2; j < 3; j++) {
+                    map[i + Math.floor(y2)][j + Math.floor(x2)] = 8;
+                }
+            }
+        }
+        map[Math.floor(y2)][Math.floor(x2)] = 3;
+        if(RB(1,9) == 1) {
+            shoot(x2,y2,boss1.speedX,boss1.speedY,3,1,0);
+        }
+        for(let i = -5; i < 5; i++) {
+            for(let j = -5; j < 5; j++) {
+                map[i + Math.floor(boss1.y)][j + Math.floor(boss1.x)] = 10;
+                if(map2[i + Math.floor(boss1.y)][j + Math.floor(boss1.x)] == 2 || map2[i + Math.floor(boss1.y)][j + Math.floor(boss1.x)] == 5) {
+                    boss1.health--;
+                    if(map2[i + Math.floor(boss1.y)][j + Math.floor(boss1.x)] == 2) {
+                        player1.recoilX = player1.speedX * -10;
+                        player1.recoilY = player1.speedY * -10;
+                    } else {
+                        player1.recoilX = player1.speedX * -4;
+                        player1.recoilY = player1.speedY * -4;
+                    }
+                    for(let i = 0; i < 5; i++) {
+                        shoot(boss1.x,boss1.y,player1.speedX * -1 + RB(-10,10) / 100,player1.speedY * -1 + RB(-10,10) / 100,1,1);
+                    }
+                    if(boss1.health <= 0) {
+                        boss1.fight = 0;
+                        boss1.death = 1;
+                        boss1.x = canvas.width * -1;
+                        boss1.y = canvas.height * -1;
+                        boss1.health = boss1.maxhealth;
+                    }
+                }
+            }
+        }
+    }
     for(let i = 0; i < maxenemys; i++) {
         enemys[i].update(player1.x,player1.y,speed);
         /*
@@ -772,7 +846,13 @@ var game = () => {
         map[1][1] = 6;
         return 0;
     }
-    if(RB(1,200) == 1) {
+    let a = 0
+    if(boss1.fight == 1) {
+        a = RB(1,100);
+    } else {
+        a = RB(1,400);
+    }
+    if(a == 1) {
         let min = RB(0,canvas.width);
         let max = RB(min,canvas.width);
         if(RB(1,2) == 1) {
@@ -811,6 +891,11 @@ var game = () => {
     player1.x = player1.ox;
     player1.y = player1.oy;
     if(player1.killsuntilupgrade >= upgrade) {
+        if(boss1.fight != 1) {
+            boss1.fight = 1;
+            boss1.x = canvas.width / 2;
+            boss1.y = canvas.height / 2;
+        }
         while(distance(player1.x,player1.y,player1.ox,player1.oy) <= player1.gunlength) {
             player1.x -= player1.speedX;
             player1.y -= player1.speedY;
